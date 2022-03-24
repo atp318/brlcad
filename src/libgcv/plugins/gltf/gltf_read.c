@@ -32,12 +32,14 @@
 #include "rt/geom.h"
 #include "raytrace.h"
 #include "wdb.h"
+#include "tinygltf/tiny_gltf.h"
 
 
 HIDDEN int
 gltf_read(struct gcv_context *UNUSED(context), const struct gcv_opts *UNUSED(gcv_options), const void *UNUSED(options_data), const char *UNUSED(source_path))
 {
-    return 1;
+	printf("ecksdee");
+	return 1;
 }
 
 
