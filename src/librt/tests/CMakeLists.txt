@@ -23,6 +23,17 @@ BRLCAD_ADDEXEC(rt_nurbs_tester nurbs_tests.cpp "librt;libbrep;libbu" TEST)
 # disabled prior to 7.22.2 release due to unresolved failures in the implementation
 #BRLCAD_ADD_TEST(NAME NURBS-get_closest_point-distinct_points nurbs_tester ${CMAKE_CURRENT_SOURCE_DIR}/nurbs_surfaces.g 1)
 
+# materialX testing
+#set(MATERIALX_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/../../../MaterialXSource/lib/MaterialXCore.lib;${CMAKE_CURRENT_SOURCE_DIR}/../../../MaterialXSource/lib/MaterialXFormat.lib;${CMAKE_CURRENT_SOURCE_DIR}/../../../MaterialXSource/lib/MaterialXGenOsl.lib;${CMAKE_CURRENT_SOURCE_DIR}/../../../MaterialXSource/lib/MaterialXGenShader.lib)
+set(USING_MATERIALX NO)
+if(USING_MATERIALX)
+  BRLCAD_ADDEXEC(materialx_test materialx_test.cpp "librt;" TEST)
+  BRLCAD_ADD_TEST(NAME rt_mtlx_test COMMAND materialx_test)
+else(USING_MATERIALX)
+  CMAKEFILES(materialx_test.cpp)
+endif(USING_MATERIALX)
+
+
 # diff testing
 BRLCAD_ADDEXEC(rt_diff diff.c "librt" TEST)
 
@@ -50,6 +61,9 @@ BRLCAD_ADD_TEST(NAME rt_cache_serial_multiple_different_objects COMMAND rt_cache
 BRLCAD_ADD_TEST(NAME rt_cache_parallel_multiple_different_objects  COMMAND rt_cache 6 10)
 BRLCAD_ADD_TEST(NAME rt_cache_parallel_multiple_different_objects_hierarchy_1  COMMAND rt_cache 7 10)
 
+# lod testing
+BRLCAD_ADDEXEC(rt_lod lod.c "librt;libbg" TEST)
+
 set(distcheck_files
   CMakeLists.txt
   arb_intersect.g
@@ -67,4 +81,4 @@ CMAKEFILES(${distcheck_files})
 # mode: cmake
 # indent-tabs-mode: t
 # End:
-# ex: shiftwidth=2 tabstop=8 textwidth=0 wrapmargin=0
+# ex: shiftwidth=2 tabstop=8

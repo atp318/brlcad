@@ -6,13 +6,10 @@ set(BG_INCLUDE_DIRS
   ${BU_INCLUDE_DIRS}
   ${POLY2TRI_INCLUDE_DIRS}
   ${SPSR_INCLUDE_DIR}
+  ${BRLCAD_SOURCE_DIR}/src/other/ext/Eigen
   )
 
-set(BG_LOCAL_INCLUDE_DIRS
-  ${EIGEN_INCLUDE_DIRS}
-  )
-
-BRLCAD_LIB_INCLUDE_DIRS(bg BG_INCLUDE_DIRS BG_LOCAL_INCLUDE_DIRS)
+BRLCAD_LIB_INCLUDE_DIRS(bg BG_INCLUDE_DIRS "")
 
 set(SPSR_srcs
   spsr/Allocator.h
@@ -62,6 +59,7 @@ set(LIBBG_SOURCES
   chull3d.cpp
   clip.c
   clipper.cpp
+  lod.cpp
   lseg_lseg.c
   lseg_pt.c
   obr.c
@@ -72,6 +70,7 @@ set(LIBBG_SOURCES
   polygon_op.cpp
   polygon_triangulate.cpp
   polygon_point_in.c
+  sat.c
   snap.c
   spsr.c
   ${SPSR_srcs}

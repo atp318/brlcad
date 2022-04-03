@@ -90,6 +90,13 @@ project(BRLCAD VERSION ${BRLCAD_VERSION} DESCRIPTION "Open Source Solid Modeling
 #######
 
 
+# Policy CMP0074 allows CMake to search
+# "prefixes specified by the <PackageName>_ROOT in find_package"
+# https://cmake.org/cmake/help/git-stage/policy/CMP0074.html
+if (POLICY CMP0074)
+  cmake_policy(SET CMP0074 NEW)
+endif (POLICY CMP0074)
+
 # Test name character check - need to look into this one...
 if (POLICY CMP0110)
   cmake_policy(SET CMP0110 OLD)
@@ -99,6 +106,7 @@ endif (POLICY CMP0110)
 if (POLICY CMP0127)
   cmake_policy(SET CMP0127 NEW)
 endif (POLICY CMP0127)
+
 
 #---------------------------------------------------------------------
 # CMake derives much of its functionality from modules, typically
@@ -457,17 +465,6 @@ if(${CMAKE_WORD_SIZE} MATCHES "64BIT")
   CONFIG_H_APPEND(BRLCAD "#ifndef __WORDSIZE\n#  define __WORDSIZE 64\n#endif\n")
 endif(${CMAKE_WORD_SIZE} MATCHES "64BIT")
 
-# Auto-reconfiguration - by default, a CMake generated build system
-# will re-run CMake if it detects that build system logic has changed.
-# This is normally a good thing, but becomes problematic when using
-# Visual Studio - recent versions of MSVC will individually prompt for
-# a re-loading of generated solution files one at a time.  Since
-# BRL-CAD has over a thousand such files in a default build, the only
-# viable approach is to close Visual Studio, re-run CMake manually,
-# and re-open the project in Visual Studio.
-if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
-  set(CMAKE_SUPPRESS_REGENERATION ON)
-endif("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
 
 # *******************************************************************
 if(BRLCAD_PRINT_MSGS)
@@ -491,6 +488,26 @@ file(RENAME "${CMAKE_BINARY_DIR}/CMakeFiles/configure.new.tmp"
   "${CMAKE_BINARY_DIR}/configure.new")
 
 include(BRLCAD_User_Options)
+
+# global msvc-specific configuration setup
+if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
+  # Auto-reconfiguration - by default, a CMake generated build system
+  # will re-run CMake if it detects that build system logic has
+  # changed.  This is normally a good thing, but becomes problematic
+  # when using Visual Studio - recent versions of MSVC will
+  # individually prompt for a re-loading of generated solution files
+  # one at a time.  Since BRL-CAD has over a thousand such files in a
+  # default build, the only viable approach is to close Visual Studio,
+  # re-run CMake manually, and re-open the project in Visual Studio.
+  set(CMAKE_SUPPRESS_REGENERATION ON)
+
+  # make visual studio default to a more useful output summary instead
+  # of minimal lines with no compilation context.
+  if (NOT DEFINED CMAKE_VERBOSE_MAKEFILE)
+    set(CMAKE_VERBOSE_MAKEFILE ON)
+  endif (NOT DEFINED CMAKE_VERBOSE_MAKEFILE)
+endif("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
+
 
 # *******************************************************************
 if(BRLCAD_PRINT_MSGS)
@@ -619,14 +636,13 @@ if(${CMAKE_WORD_SIZE} MATCHES "64BIT" AND NOT CMAKE_CL_64)
   CHECK_C_FLAG("arch x86_64" VARS 64BIT_FLAG)
   CHECK_C_FLAG(64 VARS 64BIT_FLAG)
   CHECK_C_FLAG("mabi=64" VARS  64BIT_FLAG)
-  if(NOT 64BIT_FLAG AND ${CMAKE_WORD_SIZE} MATCHES "64BIT")
-    message(FATAL_ERROR "Trying to compile 64BIT but all 64 bit compiler flag tests failed!")
-  endif(NOT 64BIT_FLAG AND ${CMAKE_WORD_SIZE} MATCHES "64BIT")
   CHECK_C_FLAG(q64 VARS 64BIT_FLAG)
-  ADD_NEW_FLAG(C 64BIT_FLAG ALL)
-  ADD_NEW_FLAG(CXX 64BIT_FLAG ALL)
-  ADD_NEW_FLAG(SHARED_LINKER 64BIT_FLAG ALL)
-  ADD_NEW_FLAG(EXE_LINKER 64BIT_FLAG ALL)
+  if(64BIT_FLAG AND ${CMAKE_WORD_SIZE} MATCHES "64BIT")
+    ADD_NEW_FLAG(C 64BIT_FLAG ALL)
+    ADD_NEW_FLAG(CXX 64BIT_FLAG ALL)
+    ADD_NEW_FLAG(SHARED_LINKER 64BIT_FLAG ALL)
+    ADD_NEW_FLAG(EXE_LINKER 64BIT_FLAG ALL)
+  endif(64BIT_FLAG AND ${CMAKE_WORD_SIZE} MATCHES "64BIT")
 endif(${CMAKE_WORD_SIZE} MATCHES "64BIT" AND NOT CMAKE_CL_64)
 
 # 32 bit compilation flags
@@ -636,13 +652,12 @@ if(${CMAKE_WORD_SIZE} MATCHES "32BIT" AND NOT ${BRLCAD_WORD_SIZE} MATCHES "AUTO"
   CHECK_C_FLAG(32 VARS 32BIT_FLAG)
   CHECK_C_FLAG("mabi=32" VARS 32BIT_FLAG)
   CHECK_C_FLAG(q32 VARS 32BIT_FLAG)
-  if(NOT 32BIT_FLAG AND ${CMAKE_WORD_SIZE} MATCHES "32BIT")
-    message(FATAL_ERROR "Trying to compile 32BIT but all 32 bit compiler flag tests failed!")
-  endif(NOT 32BIT_FLAG AND ${CMAKE_WORD_SIZE} MATCHES "32BIT")
-  ADD_NEW_FLAG(C 32BIT_FLAG ALL)
-  ADD_NEW_FLAG(CXX 32BIT_FLAG ALL)
-  ADD_NEW_FLAG(SHARED_LINKER 32BIT_FLAG ALL)
-  ADD_NEW_FLAG(EXE_LINKER 32BIT_FLAG ALL)
+  if(32BIT_FLAG AND ${CMAKE_WORD_SIZE} MATCHES "32BIT")
+    ADD_NEW_FLAG(C 32BIT_FLAG ALL)
+    ADD_NEW_FLAG(CXX 32BIT_FLAG ALL)
+    ADD_NEW_FLAG(SHARED_LINKER 32BIT_FLAG ALL)
+    ADD_NEW_FLAG(EXE_LINKER 32BIT_FLAG ALL)
+  endif(32BIT_FLAG AND ${CMAKE_WORD_SIZE} MATCHES "32BIT")
 endif(${CMAKE_WORD_SIZE} MATCHES "32BIT" AND NOT ${BRLCAD_WORD_SIZE} MATCHES "AUTO" AND NOT MSVC)
 
 # Debugging flags

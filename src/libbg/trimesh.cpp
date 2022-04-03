@@ -798,7 +798,7 @@ int bg_trimesh_hanging_nodes(int num_vertices, int num_faces, fastf_t *vertices,
 
 
 int
-bg_trimesh_aabb(point_t *min, point_t *max, int *faces, int num_faces, point_t *p, int num_pnts)
+bg_trimesh_aabb(point_t *min, point_t *max, const int *faces, int num_faces, const point_t *p, int num_pnts)
 {
     /* If we can't produce any output, there's no point in continuing */
     if (!min || !max)
@@ -944,12 +944,12 @@ bg_trimesh_3d_gc(int **ofaces, point_t **opnts, int *n_opnts,
 }
 
 
-/*
- * Local Variables:
- * tab-width: 8
- * mode: C
- * indent-tabs-mode: t
- * c-file-style: "stroustrup"
- * End:
- * ex: shiftwidth=4 tabstop=8
- */
+// Local Variables:
+// tab-width: 8
+// mode: C++
+// c-basic-offset: 4
+// indent-tabs-mode: t
+// c-file-style: "stroustrup"
+// End:
+// ex: shiftwidth=4 tabstop=8
+

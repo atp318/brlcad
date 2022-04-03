@@ -31,6 +31,7 @@ set(embedded_licenses
   Inconsolata.txt
   json.txt
   libtermlib.txt
+  lod.txt
   lseg_lseg.txt
   lseg_pt.txt
   lz4.txt
@@ -52,6 +53,7 @@ set(embedded_licenses
   QuickHull.txt
   rply.txt
   RTree.txt
+  sat.txt
   search.txt
   sha1.txt
   shapelib.txt

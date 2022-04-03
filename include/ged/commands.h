@@ -234,6 +234,11 @@ GED_EXPORT extern int ged_mat_scale_about_pnt(struct ged *gedp, int argc, const 
 GED_EXPORT extern int ged_mater(struct ged *gedp, int argc, const char *argv[]);
 
 /**
+ * Apply and modify material properties to a specific object.
+ */
+GED_EXPORT extern int ged_material(struct ged *gedp, int argc, const char *argv[]);
+
+/**
  * Globs expression against database objects, does not return tokens that match nothing
  */
 GED_EXPORT extern int ged_match(struct ged *gedp, int argc, const char *argv[]);
@@ -797,20 +802,6 @@ GED_EXPORT extern int ged_npush(struct ged *gedp, int argc, const char *argv[]);
  */
 GED_EXPORT extern int ged_voxelize(struct ged *gedp, int argc, const char *argv[]);
 
-
-/** defined in get_obj_bounds.c
- *
- * @todo - belongs in view?
- *
- */
-GED_EXPORT extern int ged_get_obj_bounds(struct ged *gedp,
-					 int argc,
-					 const char *argv[],
-					 int use_air,
-					 point_t rpp_min,
-					 point_t rpp_max);
-
-
 /**
  * Decompose nmg_solid into maximally connected shells
  */
@@ -870,6 +861,19 @@ GED_EXPORT extern int ged_stat(struct ged *gedp, int argc, const char *argv[]);
 
 /* Debugging command for brep plotting */
 GED_EXPORT extern int ged_dplot(struct ged *gedp, int argc, const char *argv[]);
+
+
+/**
+ *
+ * DEPRECATED - use rt_obj_bounds instead
+ *
+ */
+DEPRECATED GED_EXPORT extern int ged_get_obj_bounds(struct ged *gedp,
+                                        int argc,
+                                        const char *argv[],
+                                        int use_air,
+                                        point_t rpp_min,
+                                        point_t rpp_max);
 
 /** @} */
 

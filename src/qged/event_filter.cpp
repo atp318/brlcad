@@ -36,7 +36,7 @@
 static bool
 widget_active(QWidget *w)
 {
-    QWidget *fw = w->focusWidget();
+    QWidget *fw = qApp->focusWidget();
     QWidget *cw = fw;
     while (cw) {
 	if (cw == w) {

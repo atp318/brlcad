@@ -1,20 +1,19 @@
 # Include directories needed by libbv users
-set(BVIEW_INCLUDE_DIRS
+set(BV_INCLUDE_DIRS
   ${BRLCAD_BINARY_DIR}/include
   ${BRLCAD_SOURCE_DIR}/include
   ${BU_INCLUDE_DIRS}
   ${BN_INCLUDE_DIRS}
   ${BG_INCLUDE_DIRS}
   )
-# local includes
-set(BVIEW_LOCAL_INCLUDE_DIRS
+
+set(BV_LOCAL_INCLUDE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}
   )
 
-BRLCAD_LIB_INCLUDE_DIRS(bview BVIEW_INCLUDE_DIRS BVIEW_LOCAL_INCLUDE_DIRS)
+BRLCAD_LIB_INCLUDE_DIRS(bv BV_INCLUDE_DIRS BV_LOCAL_INCLUDE_DIRS)
 
-# Main libbv library
-set(LIBBVIEW_SRCS
+set(LIBBV_SRCS
   adc.c
   diff.c
   font.c
@@ -31,16 +30,16 @@ set(LIBBVIEW_SRCS
   util.c
   vlist.c
   )
-BRLCAD_ADDLIB(libbv "${LIBBVIEW_SRCS}" "libbn;libbu")
+
+BRLCAD_ADDLIB(libbv "${LIBBV_SRCS}" "libbn;libbu")
 set_target_properties(libbv PROPERTIES VERSION 20.0.1 SOVERSION 20)
 
 add_subdirectory(tests)
 
-set(libbv_ignore_files
+CMAKEFILES(
   CMakeLists.txt
   TODO
   )
-CMAKEFILES(${libbv_ignore_files})
 
 # Local Variables:
 # tab-width: 8

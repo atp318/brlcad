@@ -429,7 +429,7 @@ rt_bot_bbox(struct rt_db_internal *ip, point_t *min, point_t *max, const struct 
     struct rt_bot_internal *bot_ip = (struct rt_bot_internal *)ip->idb_ptr;
     RT_BOT_CK_MAGIC(bot_ip);
 
-    return bg_trimesh_aabb(min, max, bot_ip->faces, bot_ip->num_faces, (point_t *)bot_ip->vertices, bot_ip->num_vertices);
+    return bg_trimesh_aabb(min, max, bot_ip->faces, bot_ip->num_faces, (const point_t *)bot_ip->vertices, bot_ip->num_vertices);
 
 }
 
@@ -897,6 +897,11 @@ rt_bot_adaptive_plot(struct bu_list *vhead, struct rt_db_internal *ip, const str
             BOT_BBOX_ARB_FACE(pt, 1, 5, 6, 2);      \
         }
 
+// TODO - while this routine makes the vlists per the standard librt API, BoTs
+// are a case where we probably should be passing the data directly to the
+// drawing routines as face and vert arrays for the hot drawing paths WITHOUT
+// making the vlist copies... this duplication results in massive additional
+// memory usage for large BoTs.
 int
 rt_bot_plot(struct bu_list *vhead, struct rt_db_internal *ip, const struct bg_tess_tol *UNUSED(ttol), const struct bn_tol *tol, const struct bview *info)
 {

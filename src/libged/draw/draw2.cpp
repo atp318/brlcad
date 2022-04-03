@@ -45,23 +45,23 @@
 #include "../ged_private.h"
 
 #define GET_BV_SCENE_OBJ(p, fp) { \
-        if (BU_LIST_IS_EMPTY(fp)) { \
-            BU_ALLOC((p), struct bv_scene_obj); \
-        } else { \
-            p = BU_LIST_NEXT(bv_scene_obj, fp); \
-            BU_LIST_DEQUEUE(&((p)->l)); \
-        } \
-        BU_LIST_INIT( &((p)->s_vlist) ); }
+	if (BU_LIST_IS_EMPTY(fp)) { \
+	    BU_ALLOC((p), struct bv_scene_obj); \
+	} else { \
+	    p = BU_LIST_NEXT(bv_scene_obj, fp); \
+	    BU_LIST_DEQUEUE(&((p)->l)); \
+	} \
+	BU_LIST_INIT( &((p)->s_vlist) ); }
 
 static int
 _fp_bbox(fastf_t *s_size, point_t *bmin, point_t *bmax,
-	struct db_full_path *fp,
-	struct db_i *dbip,
-	const struct bg_tess_tol *ttol,
-	const struct bn_tol *tol,
-	mat_t *s_mat,
-	struct resource *res,
-	struct bview *v
+	 struct db_full_path *fp,
+	 struct db_i *dbip,
+	 const struct bg_tess_tol *ttol,
+	 const struct bn_tol *tol,
+	 mat_t *s_mat,
+	 struct resource *res,
+	 struct bview *v
 	)
 {
     VSET(*bmin, INFINITY, INFINITY, INFINITY);
@@ -130,7 +130,7 @@ _bound_fp(struct db_full_path *path, mat_t *curr_mat, void *client_data)
 	if (rt_db_get_internal(&in, dp, dd->dbip, NULL, &rt_uniresource) < 0)
 	    return;
 	comb = (struct rt_comb_internal *)in.idb_ptr;
-	db_fullpath_draw_subtree(path, comb->tree, curr_mat, _bound_fp, client_data);
+	draw_walk_tree(path, comb->tree, curr_mat, _bound_fp, client_data);
 	rt_db_free_internal(&in);
     } else {
 	// If we're skipping subtractions there's no
@@ -448,9 +448,9 @@ ged_draw_view(struct ged *gedp, struct bview *v, struct bv_obj_settings *vs, int
 	dd.vs = vs;
 	dd.g = g;
 
-	// In drawing mode 3 (bigE) we are producing an evaluated shape,
-	// rather than iterating to get the solids
-	if (vs->s_dmode == 3) {
+	// In drawing modes 3 (bigE) and 5 (points) we are producing an
+	// evaluated shape, rather than iterating to get the solids
+	if (vs->s_dmode == 3 || vs->s_dmode == 5) {
 	    if (vs->color_override) {
 		VMOVE(g->s_color, vs->color);
 	    } else {
@@ -465,23 +465,24 @@ ged_draw_view(struct ged *gedp, struct bview *v, struct bv_obj_settings *vs, int
 	    ud->ttol = dd.ttol;
 	    ud->res = dd.res;
 	    g->s_i_data = (void *)ud;
-	    g->s_update_callback = &ged_update_db_path;
-	    g->s_free_callback = &ged_free_draw_data;
+	    g->s_update_callback = &draw_update;
+	    g->s_free_callback = &draw_free_data;
 	    g->s_v = dd.v;
 	    g->s_v->vlfree = &RTG.rtg_vlfree;
 
 	    if (bounds_data.s_size && bounds_data.s_size->find(DB_FULL_PATH_CUR_DIR(fp)) != bounds_data.s_size->end()) {
 		g->s_size = (*bounds_data.s_size)[DB_FULL_PATH_CUR_DIR(fp)];
 	    }
-	    ged_scene_obj_geom(g);
+	    draw_scene(g);
 
 	    // Done with path
 	    db_free_full_path(fp);
 	    BU_PUT(fp, struct db_full_path);
 	    continue;
 	}
+
 	// Walk the tree to build up the set of scene objects
-	db_fullpath_draw(fp, &mat, (void *)&dd);
+	draw_gather_paths(fp, &mat, (void *)&dd);
 
 	// Done with path
 	db_free_full_path(fp);
@@ -984,12 +985,12 @@ ged_redraw2_core(struct ged *gedp, int argc, const char *argv[])
     return ret;
 }
 
-/*
- * Local Variables:
- * mode: C
- * tab-width: 8
- * indent-tabs-mode: t
- * c-file-style: "stroustrup"
- * End:
- * ex: shiftwidth=4 tabstop=8
- */
+// Local Variables:
+// tab-width: 8
+// mode: C++
+// c-basic-offset: 4
+// indent-tabs-mode: t
+// c-file-style: "stroustrup"
+// End:
+// ex: shiftwidth=4 tabstop=8
+

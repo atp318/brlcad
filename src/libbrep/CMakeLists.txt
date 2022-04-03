@@ -12,7 +12,6 @@ set(BREP_INCLUDE_DIRS
 set(BREP_LOCAL_INCLUDE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${REGEX_INCLUDE_DIRS}
-  ${EIGEN_INCLUDE_DIRS}
   )
 
 BRLCAD_LIB_INCLUDE_DIRS(brep BREP_INCLUDE_DIRS BREP_LOCAL_INCLUDE_DIRS)
@@ -65,7 +64,6 @@ CMAKEFILES(
   PullbackCurve.h
   brep_defines.h
   brep_except.h
-  cdt/RTree.h
   cdt/cdt.h
   cdt/mesh.h
   debug_plot.h

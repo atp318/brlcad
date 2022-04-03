@@ -569,6 +569,7 @@ struct dm_impl dm_swrast_impl = {
     gl_drawPoints3D,
     gl_drawVList,
     gl_drawVListHiddenLine,
+    gl_draw_tri,
     gl_draw_data_axes,
     gl_draw,
     gl_setFGColor,
@@ -662,12 +663,12 @@ COMPILER_DLLEXPORT const struct dm_plugin *dm_plugin_info()
 }
 #endif
 
-/*
- * Local Variables:
- * mode: C
- * tab-width: 8
- * indent-tabs-mode: t
- * c-file-style: "stroustrup"
- * End:
- * ex: shiftwidth=4 tabstop=8
- */
+// Local Variables:
+// tab-width: 8
+// mode: C++
+// c-basic-offset: 4
+// indent-tabs-mode: t
+// c-file-style: "stroustrup"
+// End:
+// ex: shiftwidth=4 tabstop=8
+

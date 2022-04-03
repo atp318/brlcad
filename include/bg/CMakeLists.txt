@@ -3,11 +3,13 @@ set(bg_headers
   chull.h
   clip.h
   defines.h
+  lod.h
   lseg.h
   obr.h
   plane.h
   polygon.h
   polygon_types.h
+  sat.h
   spsr.h
   tri_pt.h
   tri_ray.h

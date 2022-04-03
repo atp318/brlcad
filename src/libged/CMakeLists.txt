@@ -39,6 +39,7 @@ set(LIBGED_SOURCES
   path.c
   pipe.c
   pnts_util.c
+  points_eval.c
   polyclip.cpp
   qray.c
   rotate_eto.c
@@ -247,6 +248,7 @@ add_subdirectory(make)
 add_subdirectory(make_name)
 add_subdirectory(match)
 add_subdirectory(mater)
+add_subdirectory(material)
 add_subdirectory(metaball)
 add_subdirectory(mirror)
 add_subdirectory(model2grid_lu)
