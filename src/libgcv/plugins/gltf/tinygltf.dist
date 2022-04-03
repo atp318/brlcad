@@ -10,7 +10,6 @@ tinygltf/.travis-before-install.sh
 tinygltf/Makefile
 tinygltf/vcsetup.bat
 tinygltf/tests/catch.hpp
-tinygltf/tests/Makefile
 tinygltf/tests/fuzzer/meson.build
 tinygltf/tests/fuzzer/README.md
 tinygltf/tests/fuzzer/fuzz_gltf.cc
@@ -24,7 +23,6 @@ tinygltf/models/box01.glb
 tinygltf/models/CubeImageUriSpaces/2x2 image has spaces.png
 tinygltf/models/CubeImageUriSpaces/CubeImageUriSpaces.bin
 tinygltf/models/CubeImageUriSpaces/CubeImageUriMultipleSpaces.gltf
-tinygltf/models/CubeImageUriSpaces/ 2x2 image  has multiple      spaces.png
 tinygltf/models/CubeImageUriSpaces/CubeImageUriSpaces.gltf
 tinygltf/models/Cube/Cube_BaseColor.png
 tinygltf/models/Cube/Cube.bin
