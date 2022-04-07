@@ -1,4 +1,4 @@
-/*                  F U Z Z _ T E S T 1 . C X X
+/*               F U Z Z _ S H O O T R A Y . C P P
  * BRL-CAD
  *
  * Copyright (c) 2020-2022 United States Government as represented by
@@ -17,22 +17,20 @@
  * License along with this file; see the file named COPYING for more
  * information.
  */
-/** @file fuzz_test1.cxx
- *
- * Brief description
- *
- */
 
 #include "common.h"
 
 #include <stdint.h>
 #include <stddef.h>
 
+#include "bio.h"
+
+#include "bu/app.h"
+#include "bu/file.h"
 #include "raytrace.h"
-#include <unistd.h>
 
 
-int
+static int
 fhit(struct application *ap, struct partition *PartHeadp, struct seg *UNUSED(segs))
 {
     /* iterating over partitions, this will keep track of the current
@@ -51,7 +49,6 @@ fhit(struct application *ap, struct partition *PartHeadp, struct seg *UNUSED(seg
 
     /* will contain our hit point coordinate */
     point_t pt;
-   
 
     /* will contain normal vector where ray enters geometry */
     vect_t inormal;
@@ -106,11 +103,10 @@ fhit(struct application *ap, struct partition *PartHeadp, struct seg *UNUSED(seg
 	RT_HIT_NORMAL(onormal, hitp, stp, &(ap->a_ray), pp->pt_outflip);
     }
 
-    /* A more complicated application would probably fill in a new
-     * local application structure and describe, for example, a
-     * reflected or refracted ray, and then call rt_shootray() for
-     * those rays.
-     */
+    VPRINT("hit point: ", pt);
+    VPRINT("outnormal: ", onormal);
+    VPRINT("in normal: ", inormal);
+    VPRINT("curvature: ", cur.crv_pdir);
 
     /* Hit routine callbacks generally return 1 on hit or 0 on miss.
      * This value is returned by rt_shootray().
@@ -119,39 +115,35 @@ fhit(struct application *ap, struct partition *PartHeadp, struct seg *UNUSED(seg
 }
 
 
-int
-miss(struct application *UNUSED(ap))
+static int
+fmiss(struct application *UNUSED(ap))
 {
     return 0;
 }
 
 
-extern "C" int LLVMFuzzerTestOneInput(const int8_t *data, size_t size) {
+extern "C" int
+LLVMFuzzerTestOneInput(const int8_t *data, size_t size)
+{
     if(data == NULL){}
     if(size == 0){}
     struct application ap;
     static struct rt_i *rtip = NULL;
-    struct resource res = RT_RESOURCE_INIT_ZERO;
+//    struct resource res = RT_RESOURCE_INIT_ZERO;
     char title[1024] = {0};
-    char cwd[PATH_MAX];
-   if (getcwd(cwd, sizeof(cwd)) != NULL) {
-       printf("Current working dir: %s\n", cwd);
-   } else {
-       perror("getcwd() error");
-       return 1;
-   }
-    const char *file = "../../share/db/moss.g";
+
+    const char *file = bu_dir(NULL, 0, BU_DIR_DATA, "..", "..", "share", "db", "moss.g", NULL);
     const char *objs = "all.g";
 
-    rt_init_resource(&res, 1, rtip);
+    if (!bu_file_exists(file, NULL))
+	return 1;
 
     rtip = rt_dirbuild(file, title, sizeof(title));
     if (rtip == RTI_NULL) {
 	bu_exit(2, "Building the database directory for [%s] FAILED\n", file);
     }
-    rt_clean(rtip);
 
-    return 0;
+   rt_init_resource(&rt_uniresource, 0, rtip);
 
     if (title[0]) {
 	bu_log("Title:\n%s\n", title);
@@ -161,30 +153,29 @@ extern "C" int LLVMFuzzerTestOneInput(const int8_t *data, size_t size) {
 
     rt_prep_parallel(rtip, 1);
     RT_APPLICATION_INIT(&ap);
-    ap.a_resource = &res;
+    ap.a_resource = &rt_uniresource;
     ap.a_rt_i = rtip;
     ap.a_onehit = 0;
     ap.a_hit = fhit;
-    ap.a_miss = miss;
+    ap.a_miss = fmiss;
 
     VSET(ap.a_ray.r_pt, 0.0, 0.0, 10000.0);
     VSET(ap.a_ray.r_dir, 0.0, 0.0, -1.0);
 
     rt_shootray(&ap);
 
-    rt_clean_resource_complete(rtip, &res);
     rt_clean(rtip);
+    rt_clean_resource_complete(rtip, &rt_uniresource);
 
     return 0;
 }
 
 
-/*
- * Local Variables:
- * mode: C
- * tab-width: 8
- * indent-tabs-mode: t
- * c-file-style: "stroustrup"
- * End:
- * ex: shiftwidth=4 tabstop=8
- */
+// Local Variables:
+// tab-width: 8
+// mode: C++
+// c-basic-offset: 4
+// indent-tabs-mode: t
+// c-file-style: "stroustrup"
+// End:
+// ex: shiftwidth=4 tabstop=8

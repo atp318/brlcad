@@ -35,9 +35,6 @@ set(ART_INCLUDE_DIRS
 list(REMOVE_DUPLICATES ART_INCLUDE_DIRS)
 BRLCAD_INCLUDE_DIRS(ART_INCLUDE_DIRS)
 
-#get_filename_component(Appleseed_LIB_DIR "${Appleseed_LIBRARY}" DIRECTORY)
-#file(GLOB Appleseed_BOOST_SYSTEM_LIBS "${Appleseed_LIB_DIR}/libboost_system-*")
-#file(GLOB Appleseed_OPENIMAGEIO_LIBS "${Appleseed_LIB_DIR}/libOpenImageIO.*")
 
 set(ART_LIBS
   Threads::Threads
@@ -51,8 +48,9 @@ set(ART_LIBS
   ${Boost_LIBRARIES}
   ${M_LIBRARY}
   )
-#  ${Appleseed_BOOST_SYSTEM_LIBS}
-#  ${Appleseed_OPENIMAGEIO_LIBS}
+link_directories(${Boost_LIBRARY_DIR})
+link_directories(${Appleseed_LIBRARY_DIR})
+
 
 set(ART_SRCS
   art.cpp
@@ -62,6 +60,12 @@ set(ART_SRCS
   )
 
 BRLCAD_ADDEXEC(art "${ART_SRCS}" "${ART_LIBS}" FOLDER Rt)
+
+# copy precompiled appleseed.dll into same dir as art.exe
+if (CMAKE_SHARED_LIBRARY_SUFFIX STREQUAL ".dll")
+  add_custom_command(TARGET art POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${Appleseed_LIBRARY}" $<TARGET_FILE_DIR:art>)
+endif (CMAKE_SHARED_LIBRARY_SUFFIX STREQUAL ".dll")
+
 
 # Local Variables:
 # tab-width: 8
