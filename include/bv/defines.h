@@ -121,6 +121,36 @@ struct bv_axes {
     int       tick_major_color[3];
 };
 
+// Mesh LoD drawing doesn't use vlists, but instead directly processes triangle
+// data to minimize memory usage.  Although the primary logic for LoD lives in
+// libbg, the drawing data is basic in nature. We define a struct container
+// that can be used by the multiple libraries which must interact with it to
+// make information passing simpler.
+struct bv_mesh_lod_info {
+    // The set of triangle faces to be used when drawing
+    int fcnt;
+    const int *faces;
+
+    // The vertices used by the faces array
+    const point_t *points;
+    const point_t *points_orig;
+
+    // Optional: an "active subset" of faces in the faces array may be passed
+    // in as an index array in fset.  If fset is NULL, all will be drawn.
+    int fset_cnt;
+    int *fset;
+
+    // Optional: per-face-vertex normals
+    const int *face_normals;
+    const vect_t *normals;
+
+    // Drawing mode: 0 = wireframe, 1 = shaded
+    int mode;
+
+    // Pointer to LoD container
+    void *lod;
+};
+
 
 // Many settings have defaults at the view level, and may be overridden for
 // individual scene objects.
@@ -173,6 +203,7 @@ struct bv_obj_settings {
 #define BV_LABELS         0x08
 #define BV_AXES           0x10
 #define BV_POLYGONS       0x20
+#define BV_MESH_LOD       0x40
 
 struct bview;
 
@@ -244,6 +275,10 @@ struct bv_scene_obj  {
 
     /* Container for reusing bv_scene_obj allocations */
     struct bv_scene_obj *free_scene_obj;
+
+    /* For more specialized routines not using vlists, we may need
+     * additional drawing data associated with a scene object */
+    void *draw_data;
 
     /* User data to associate with this view object */
     void *s_u_data;

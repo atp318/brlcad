@@ -44,35 +44,93 @@ struct bg_mesh_lod {
     struct bg_mesh_lod_internal *i;
 };
 
-/* Given a set of points and faces, create the internal data structures needed
- * to support LoD queries.  Note that this is a static container, assuming a
- * non-changing mesh - if the mesh is changed after it is created, the internal
- * container does *NOT* automatically update.  In that case the old struct
- * should be destroyed and a new one created. */
-BG_EXPORT struct bg_mesh_lod *
-bg_mesh_lod_create(const point_t *v, int vcnt, int *f, int fcnt);
+/**
+ * Given a set of points and faces, do the initial calculations to generate the
+ * cached LoD data needed for subsequent lookups.  This only needs to be done
+ * once per un-cached data set, but is potentially an expensive operation.
+ *
+ * If pre-existing cached data is found, the key is just returned - to clear
+ * pre-existing cached data, run bg_mesh_lod_clear();
+ *
+ * returns the lookup key calculated from the data, which is used in subsequent
+ * lookups of the cached data. */
+BG_EXPORT unsigned long long
+bg_mesh_lod_cache(const point_t *v, int vcnt, int *f, int fcnt);
 
+/**
+ * Set up the bg_mesh_lod data using cached LoD information associated with
+ * key.  If no cached data has been prepared, a NULL container is returned.
+ *
+ * Note: bg_mesh_lod assumes a non-changing mesh - if the mesh is changed after
+ * it is created, the internal container does *NOT* automatically update.  In
+ * that case the old struct should be destroyed and a new one created.
+ *
+ * A bg_mesh_lod return from this function will be initialized only to the
+ * lowest level of data (i.e. the coarsest possible representation of the
+ * object.) To tailor the data, use the bg_mesh_lod_view function.  For lower
+ * level control, the bg_mesh_lod_level function may be used to explicitly
+ * manipulate the loaded LoD (usually used for debugging, but also useful if an
+ * application wishes to visualize levels explicitly.)
+ */
 BG_EXPORT struct bg_mesh_lod *
-bg_mesh_lod_load(const char *name);
+bg_mesh_lod_init(unsigned long long key);
+
+/**
+ * Given a bview, load the appropriate level of detail for displaying the mesh
+ * in that view.  A scale factor may also be supplied to adjust the default
+ * level assignments (say, for example, if a parent application wants to drive
+ * detail down to increase frame rates.)  Negative values will be removed from
+ * the view-based selected level, reducing detail (for example, if the view
+ * selection is level 8, and the scale is -2, the mesh will be rendered using
+ * level 6.)  Likewise, positive values will be added to increase detail.
+ *
+ * Returns the level selected.  If v == NULL, return current level of l.  If
+ * there is an error or l == NULL, return -1; */
+BG_EXPORT int
+bg_mesh_lod_view(struct bg_mesh_lod *l, struct bview *v, int scale);
+
+/**
+ * Given a detail level, load the appropriate data.  This is not normally used
+ * by client codes directly, but may be needed if an app needs  manipulate
+ * the level of detail without a view.
+ *
+ * Returns the level selected.  If level == -1, return current level of l.  If
+ * there is an error, return -1; */
+BG_EXPORT int
+bg_mesh_lod_level(struct bg_mesh_lod *l, int level);
+
+/**
+ * The "raw" vertices stored in bg_mesh_lod are not necessarily the final
+ * positions a given LoD level setting expects - to calculate the current
+ * position for the active level, call vsnap on a point from the verts array
+ * retrieved above.  (Drawing using the original points rather than applying
+ * this transformation will typically draw a subset of the original mesh
+ * triangles in their "final" positions, leaving significant holes in the
+ * visible mesh.)
+ */
+BG_EXPORT void
+bg_mesh_lod_vsnap(point_t *o, const point_t *v, struct bg_mesh_lod *l);
 
 /* Clean up the lod container. */
 BG_EXPORT void
 bg_mesh_lod_destroy(struct bg_mesh_lod *lod);
 
-/* Given a view and a bg_mesh_lod container, return the appropriate vlist of
- * edges for display.  This is the core of the LoD functionality.  The vlist
- * components are managed using the vlfree list supplied by the bview struct,
- * so the caller should treat them like other scene object vlists.
- *
- * Note that this routine and the LoD container behind it are focused only on
- * wireframes - visual artifacts that would be problematic if we were returning
- * a triangle vlist (flipped faces, mesh topology, etc.) are not considered.
- * The focus of this routine is to produce fast, reasonable quality edge
- * visualizations for large meshes to support classic BRL-CAD wireframe mesh
- * views.
- */
+/* Remove cache data associated with key.  If key == 0, remove ALL cache data
+ * associated with all LoD objects (i.e. a full LoD cache reset). */
+BG_EXPORT void
+bg_mesh_lod_clear(unsigned long long key);
+
+/* Set drawing function callback */
+BG_EXPORT void
+bg_mesh_lod_set_draw_callback(struct bg_mesh_lod *lod, int (*clbk)(void *ctx, struct bv_mesh_lod_info *info));
+
+/* Trigger a triangle drawing operation. */
+BG_EXPORT void
+bg_mesh_lod_draw(struct bg_mesh_lod *lod, void *ctx, int mode);
+
+/* Callback for updating level settings on an object. */
 BG_EXPORT int
-bg_lod_elist(struct bu_list *elist, struct bview *v, struct bg_mesh_lod *l, const char *pname);
+bg_mesh_lod_update(struct bv_scene_obj *s, int offset);
 
 __END_DECLS
 
